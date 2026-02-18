@@ -3,59 +3,10 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MockWeatherService, WeatherData } from "@/lib/weatherService";
-import { findCityData } from "@/lib/cities";
 import { findNearestCity } from "@/lib/geolocation";
 import Sidebar from "@/components/Sidebar";
 import WeatherVisuals from "@/components/WeatherVisuals";
-
-// Mock ArtStyle type matches Prisma schema
-type ArtStyle = {
-  id: number;
-  name: string;
-  nameCn: string;
-  outfitAdvice: string;
-  outfitAdviceCn: string;
-  artistReference: string;
-  weatherCondition: string;
-};
-
-const MOCK_STYLES: ArtStyle[] = [
-  {
-    id: 1, name: "Impressionism", nameCn: "印象派",
-    weatherCondition: "Clear",
-    outfitAdvice: "Light linens, pastel florals, straw hats. Embrace the sunlight like a Monet garden.",
-    outfitAdviceCn: "輕盈亞麻、柔和花卉、草帽。如莫內的花園般擁抱陽光。",
-    artistReference: "Claude Monet",
-  },
-  {
-    id: 2, name: "Minimalism", nameCn: "極簡主義",
-    weatherCondition: "Snow",
-    outfitAdvice: "Monochromatic layers, structured wool coats, stark whites and greys. Simplicity is the ultimate sophistication.",
-    outfitAdviceCn: "單色層次、結構羊毛大衣、純白與灰調。簡約即是極致的優雅。",
-    artistReference: "Agnes Martin",
-  },
-  {
-    id: 3, name: "Film Noir", nameCn: "黑色電影",
-    weatherCondition: "Rain",
-    outfitAdvice: "Trench coats, fedoras, glossy leather boots. Step into the shadows with mystery.",
-    outfitAdviceCn: "風衣、費多拉帽、亮面皮靴。帶著神秘感步入暗影之中。",
-    artistReference: "Edward Hopper",
-  },
-  {
-    id: 4, name: "Baroque", nameCn: "巴洛克",
-    weatherCondition: "Cloudy",
-    outfitAdvice: "Rich textures, velvet, gold accessories, dramatic silhouettes. Bring drama to the grey skies.",
-    outfitAdviceCn: "豐富質地、天鵝絨、金色配件、戲劇性輪廓。為灰色天空帶來戲劇張力。",
-    artistReference: "Caravaggio",
-  },
-  {
-    id: 5, name: "Romanticism", nameCn: "浪漫主義",
-    weatherCondition: "Windy",
-    outfitAdvice: "Flowing scarves, billowy shirts, unkempt elegance. Let the wind shape your silhouette.",
-    outfitAdviceCn: "飄逸圍巾、蓬鬆襯衫、不羈的優雅。讓風塑造你的輪廓。",
-    artistReference: "Caspar David Friedrich",
-  },
-];
+import { ArtStyle, getStyleForCondition } from "@/data/artStyles";
 
 // UI translations
 const ui = {
@@ -102,7 +53,7 @@ export default function Home() {
     async function fetchData() {
       const data = await MockWeatherService.getWeather(selectedCity);
       setWeather(data);
-      const match = MOCK_STYLES.find((s) => s.weatherCondition === data.condition) || MOCK_STYLES[0];
+      const match = getStyleForCondition(data.condition);
       setArtStyle(match);
       setLoading(false);
     }
