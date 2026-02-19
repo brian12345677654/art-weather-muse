@@ -313,3 +313,7 @@ export function findNearestCity(lat: number, lng: number): { city: string; dista
     }
     return { city: nearest.name, distance: Math.round(minDist) };
 }
+
+export function getCityCoords(cityName: string): GeoCity | undefined {
+    return CITY_COORDS.find(c => c.name.toLowerCase() === cityName.toLowerCase());
+}
