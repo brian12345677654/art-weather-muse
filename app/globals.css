@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
 body {
-  background: #F9F7F2;
-  color: #1A1A1A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -13,7 +11,6 @@ h3,
 h4,
 h5,
 h6 {
-  color: #1A1A1A;
   font-weight: 600;
 }
 

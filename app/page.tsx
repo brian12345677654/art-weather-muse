@@ -22,13 +22,11 @@ const ui = {
   artistReference: { en: "Artist Reference", zh: "藝術家參考" },
   curating: { en: "Curating collection for", zh: "正在為您策展" },
   selectCity: { en: "Select City", zh: "選擇城市" },
-  geoTitle: { en: "Enable Location Services?", zh: "是否啟用定位服務？" },
-  geoDescription: {
-    en: "Allow ArtWeather Muse to access your location for personalized weather and style recommendations.",
-    zh: "允許 ArtWeather Muse 存取您的位置，以提供個人化的天氣與穿搭建議。",
+  geoDeniedMsg: {
+    en: "Location access denied — enable it for local weather & art styles.",
+    zh: "定位權限被拒絕 — 開啟以顯示當地即時天氣與藝術風格。",
   },
-  geoAllow: { en: "Allow", zh: "允許" },
-  geoDeny: { en: "No Thanks", zh: "不用了" },
+  geoRetry: { en: "Enable Location", zh: "開啟定位" },
 };
 
 export default function Home() {
@@ -38,16 +36,32 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState("Taipei");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [lang, setLang] = useState<"en" | "zh">("zh");
-  const [theme, setTheme] = useState<"light" | "dark">("light"); // Theme state
-  const [showGeoPrompt, setShowGeoPrompt] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [geoDenied, setGeoDenied] = useState(false);
 
-  // Auto-prompt geolocation on first load
+  // Auto-request geolocation on mount
   useEffect(() => {
-    const dismissed = sessionStorage.getItem("geo-dismissed");
-    if (!dismissed) {
-      const timer = setTimeout(() => setShowGeoPrompt(true), 1200);
-      return () => clearTimeout(timer);
+    if (!navigator.geolocation) {
+      setGeoDenied(true);
+      return;
     }
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const result = findNearestCity(latitude, longitude);
+        console.log(`📍 Detected: ${result.city} (${result.distance}km away)`);
+        setSelectedCity(result.city);
+        setGeoDenied(false);
+      },
+      (err) => {
+        console.warn("Geolocation denied:", err.message);
+        setGeoDenied(true);
+        setSelectedCity("Taipei");
+        setLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   }, []);
 
   // Fetch weather when city changes
@@ -64,40 +78,35 @@ export default function Home() {
   }, [selectedCity]);
 
   const handleLocateMe = () => {
-    if (navigator.geolocation) {
-      setLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const result = findNearestCity(latitude, longitude);
-          console.log(`📍 Detected: ${result.city} (${result.distance}km away)`);
-          setSelectedCity(result.city);
-        },
-        (err) => {
-          console.warn("Geolocation denied:", err.message);
-          setSelectedCity("Taipei");
-          setLoading(false);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+    if (!navigator.geolocation) {
+      setGeoDenied(true);
+      return;
     }
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const result = findNearestCity(latitude, longitude);
+        console.log(`📍 Detected: ${result.city} (${result.distance}km away)`);
+        setSelectedCity(result.city);
+        setGeoDenied(false);
+      },
+      (err) => {
+        console.warn("Geolocation denied:", err.message);
+        setGeoDenied(true);
+        setSelectedCity("Taipei");
+        setLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
-  const handleGeoAllow = () => {
-    setShowGeoPrompt(false);
-    sessionStorage.setItem("geo-dismissed", "true");
-    handleLocateMe();
-  };
 
-  const handleGeoDeny = () => {
-    setShowGeoPrompt(false);
-    sessionStorage.setItem("geo-dismissed", "true");
-  };
 
   // Theme Styles
   const themeClasses = theme === "light"
-    ? "bg-[#F9F9F9] text-museum-text selection:bg-museum-accent/20"
-    : "bg-[#121212] text-gray-200 selection:bg-gray-500/30";
+    ? "bg-[#F9F9F9] text-[#333333] selection:bg-museum-accent/20"
+    : "bg-[#121212] text-[#FAF9F6] selection:bg-[#FAF9F6]/20";
 
   return (
     <main className={`min-h-screen ${themeClasses} transition-colors duration-500 overflow-x-hidden relative`}>
@@ -111,44 +120,29 @@ export default function Home() {
         lang={lang}
       />
 
-      {/* Geolocation Prompt Modal */}
+      {/* Geolocation Denied Banner */}
       <AnimatePresence>
-        {showGeoPrompt && (
+        {geoDenied && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -60, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className={`fixed top-20 left-1/2 -translate-x-1/2 z-[60] max-w-lg w-[90%] flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg backdrop-blur-md border ${theme === "light"
+                ? "bg-white/80 border-museum-accent/30 text-[#333333]"
+                : "bg-[#1e1e1e]/90 border-[#FAF9F6]/10 text-[#FAF9F6]"
+              }`}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="bg-[#F9F7F2] text-museum-text max-w-md w-full mx-6 p-10 shadow-2xl rounded-sm"
+            <span className="text-xl shrink-0">📍</span>
+            <p className="text-xs font-sans leading-snug flex-1">
+              {ui.geoDeniedMsg[lang]}
+            </p>
+            <button
+              onClick={handleLocateMe}
+              className="shrink-0 text-[10px] font-sans font-bold tracking-widest uppercase px-4 py-2 rounded-full bg-museum-accent text-white hover:bg-museum-accent/80 transition-colors"
             >
-              <div className="text-center">
-                <div className="text-5xl mb-6">📍</div>
-                <h2 className="text-2xl font-serif mb-2">{ui.geoTitle[lang]}</h2>
-                <p className="text-sm font-sans opacity-80 mb-8 leading-relaxed">
-                  {ui.geoDescription[lang]}
-                </p>
-                <div className="flex gap-4">
-                  <button
-                    onClick={handleGeoDeny}
-                    className="flex-1 py-3 border border-museum-text/20 text-xs font-sans font-bold tracking-widest uppercase hover:bg-museum-text/5 transition-colors"
-                  >
-                    {ui.geoDeny[lang]}
-                  </button>
-                  <button
-                    onClick={handleGeoAllow}
-                    className="flex-1 py-3 bg-museum-text text-white text-xs font-sans font-bold tracking-widest uppercase hover:bg-museum-accent transition-colors"
-                  >
-                    {ui.geoAllow[lang]}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+              {ui.geoRetry[lang]}
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -161,8 +155,8 @@ export default function Home() {
           <button
             onClick={() => setLang(lang === "en" ? "zh" : "en")}
             className={`text-xs font-sans font-bold tracking-widest uppercase backdrop-blur-sm border px-4 py-2 rounded-full transition-all duration-300 shadow-sm ${theme === "light"
-                ? "bg-white/80 border-museum-text/10 hover:bg-museum-text hover:text-white"
-                : "bg-black/80 border-white/10 hover:bg-white hover:text-black"
+              ? "bg-white/80 border-museum-text/10 hover:bg-museum-text hover:text-white"
+              : "bg-black/80 border-white/10 hover:bg-white hover:text-black"
               }`}
           >
             {lang === "en" ? "中文" : "EN"}
@@ -172,8 +166,8 @@ export default function Home() {
           <button
             onClick={() => setIsSidebarOpen(true)}
             className={`text-xs font-sans font-bold tracking-widest uppercase px-5 py-2 rounded-full transition-all duration-300 shadow-md flex items-center gap-2 ${theme === "light"
-                ? "bg-museum-text text-white hover:bg-museum-accent"
-                : "bg-white text-black hover:bg-gray-200"
+              ? "bg-museum-text text-white hover:bg-museum-accent"
+              : "bg-white text-black hover:bg-gray-200"
               }`}
           >
             🌍 {ui.selectCity[lang]}

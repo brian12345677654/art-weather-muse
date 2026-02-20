@@ -23,6 +23,16 @@ const notoSansTc = Noto_Sans_TC({
 export const metadata: Metadata = {
   title: "ArtWeather Muse",
   description: "A museum-curated weather outfit advisor.",
+  manifest: "/manifest.json",
+  themeColor: "#121212",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ArtWeather Muse",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +42,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant">
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      </head>
       <body
         className={clsx(
           playfair.variable,

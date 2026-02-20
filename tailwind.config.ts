@@ -14,8 +14,9 @@ const config: Config = {
             },
             colors: {
                 museum: {
-                    background: "#F9F7F2", // Off-white, paper-like
-                    text: "#1A1A1A",      // Soft black
+                    background: "#F9F9F9", // Ivory white
+                    text: "#333333",      // Grey-black (light mode)
+                    darkText: "#FAF9F6", // Cream white (dark mode)
                     border: "#E0E0E0",    // Subtle grey
                     accent: "#D4AF37",    // Gold/Bronze hint
                 },
