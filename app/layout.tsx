@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter, Noto_Sans_TC } from "next/font/google";
+import { Playfair_Display, Inter, Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
 
@@ -17,6 +17,12 @@ const notoSansTc = Noto_Sans_TC({
   subsets: ["latin"],
   variable: "--font-noto-sans-tc",
   weight: ["300", "400", "500", "700"],
+  display: "swap",
+});
+const notoSerifTc = Noto_Serif_TC({
+  subsets: ["latin"],
+  variable: "--font-noto-serif-tc",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -50,9 +56,10 @@ export default function RootLayout({
           playfair.variable,
           inter.variable,
           notoSansTc.variable,
+          notoSerifTc.variable,
           "bg-museum-background text-museum-text antialiased"
         )}
-        style={{ fontFamily: `var(--font-noto-sans-tc), var(--font-inter), system-ui, sans-serif` }}
+        style={{ fontFamily: `var(--font-noto-serif-tc), var(--font-noto-sans-tc), var(--font-inter), system-ui, sans-serif` }}
       >
         {children}
       </body>

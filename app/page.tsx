@@ -118,6 +118,7 @@ export default function Home() {
         selectedCity={selectedCity}
         onLocateMe={handleLocateMe}
         lang={lang}
+        theme={theme}
       />
 
       {/* Geolocation Denied Banner */}
@@ -129,8 +130,8 @@ export default function Home() {
             exit={{ y: -60, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className={`fixed top-20 left-1/2 -translate-x-1/2 z-[60] max-w-lg w-[90%] flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg backdrop-blur-md border ${theme === "light"
-                ? "bg-white/80 border-museum-accent/30 text-[#333333]"
-                : "bg-[#1e1e1e]/90 border-[#FAF9F6]/10 text-[#FAF9F6]"
+              ? "bg-white/80 border-museum-accent/30 text-[#333333]"
+              : "bg-[#1e1e1e]/90 border-[#FAF9F6]/10 text-[#FAF9F6]"
               }`}
           >
             <span className="text-xl shrink-0">📍</span>
@@ -267,7 +268,7 @@ export default function Home() {
               )}
 
               {artStyle && (
-                <div className={`relative z-10 max-w-2xl mx-auto backdrop-blur-md backdrop-brightness-110 p-8 md:p-10 rounded-2xl shadow-lg border ${theme === "light" ? "border-white/40 bg-white/30" : "border-white/10 bg-black/40"
+                <div className={`relative z-10 max-w-2xl mx-auto backdrop-blur-md p-8 md:p-10 rounded-2xl border ${theme === "light" ? "backdrop-brightness-110 border-white/40 bg-white/30 shadow-lg" : "border-[#FAF9F6]/10 bg-[#1a1a1a]/70 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
                   }`}>
                   <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
@@ -286,7 +287,7 @@ export default function Home() {
                     </h3>
 
                     {/* New: Outfit Guide Section */}
-                    <div className={`mb-8 p-6 rounded-lg ${theme === "light" ? "bg-white/50" : "bg-white/5"}`}>
+                    <div className={`mb-8 p-6 rounded-lg ${theme === "light" ? "bg-white/50 shadow-sm" : "bg-[#FAF9F6]/5 border border-[#FAF9F6]/10"}`}>
                       <h4 className="text-xs font-sans font-bold tracking-[0.2em] uppercase opacity-70 mb-3">
                         {ui.outfitGuide[lang]}
                       </h4>

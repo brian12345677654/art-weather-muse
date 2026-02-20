@@ -12,6 +12,7 @@ interface SidebarProps {
     selectedCity: string;
     onLocateMe: () => void;
     lang: "en" | "zh";
+    theme: "light" | "dark";
 }
 
 const t = {
@@ -25,7 +26,7 @@ const t = {
 
 type View = "continent" | "country" | "city";
 
-export default function Sidebar({ isOpen, onClose, onSelectCity, selectedCity, onLocateMe, lang }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onSelectCity, selectedCity, onLocateMe, lang, theme }: SidebarProps) {
     const [view, setView] = useState<View>("continent");
     const [activeContinent, setActiveContinent] = useState<ContinentData | null>(null);
     const [activeCountry, setActiveCountry] = useState<CountryData | null>(null);
@@ -88,152 +89,161 @@ export default function Sidebar({ isOpen, onClose, onSelectCity, selectedCity, o
         "South America": "🌎", "Africa": "🌍", "Oceania": "🌏", "Antarctica": "🧊",
     };
 
+    const isDark = theme === "dark";
+
     return (
         <AnimatePresence>
-            {isOpen && (
-                <>
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }}
-                        onClick={handleClose}
-                        className="fixed inset-0 bg-black z-40"
-                    />
-                    {/* Drawer */}
-                    <motion.div
-                        initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed top-0 left-0 h-full w-96 bg-[#F9F7F2] z-50 shadow-2xl flex flex-col"
-                    >
-                        {/* Header */}
-                        <div className="p-8 pb-4 shrink-0 border-b border-museum-text/10">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase text-museum-text/40">
-                                    {getSubtitle()}
-                                </span>
-                                <button onClick={handleClose} className="text-2xl font-serif text-museum-text hover:rotate-90 transition-transform duration-300">
-                                    ×
-                                </button>
+            {
+                isOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }}
+                            onClick={handleClose}
+                            className="fixed inset-0 bg-black z-40"
+                        />
+                        {/* Drawer */}
+                        <motion.div
+                            initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className={`fixed top-0 left-0 h-full w-96 z-50 shadow-2xl flex flex-col transition-colors duration-300 ${isDark ? "bg-[#121212] text-[#FAF9F6]" : "bg-[#F9F9F9] text-[#333333]"}`}
+                        >
+                            {/* Header */}
+                            <div className={`p-8 pb-4 shrink-0 border-b ${isDark ? "border-[#FAF9F6]/10" : "border-museum-text/10"}`}>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className={`text-[10px] font-sans font-bold tracking-[0.2em] uppercase ${isDark ? "text-[#FAF9F6]/40" : "text-museum-text/40"}`}>
+                                        {getSubtitle()}
+                                    </span>
+                                    <button onClick={handleClose} className={`text-2xl font-serif hover:rotate-90 transition-transform duration-300 ${isDark ? "text-[#FAF9F6]" : "text-museum-text"}`}>
+                                        ×
+                                    </button>
+                                </div>
+                                <h2 className="text-2xl font-serif">{getTitle()}</h2>
                             </div>
-                            <h2 className="text-2xl font-serif">{getTitle()}</h2>
-                        </div>
 
-                        {/* Back button */}
-                        {view !== "continent" && (
-                            <button
-                                onClick={handleBack}
-                                className="mx-8 mt-4 mb-2 text-left text-xs font-sans font-bold tracking-widest uppercase text-museum-accent hover:text-museum-text transition-colors shrink-0"
-                            >
-                                {t.back[lang]}
-                            </button>
-                        )}
-
-                        {/* Locate Me (only on continent view) */}
-                        {view === "continent" && (
-                            <div className="px-8 pt-4 pb-2 shrink-0">
+                            {/* Back button */}
+                            {view !== "continent" && (
                                 <button
-                                    onClick={() => { onLocateMe(); handleClose(); }}
-                                    className="w-full flex items-center justify-center gap-2 py-3 border border-museum-text/20 hover:border-museum-text hover:bg-museum-text hover:text-white transition-all duration-300"
+                                    onClick={handleBack}
+                                    className={`mx-8 mt-4 mb-2 text-left text-xs font-sans font-bold tracking-widest uppercase transition-colors shrink-0 text-museum-accent ${isDark ? "hover:text-[#FAF9F6]" : "hover:text-museum-text"}`}
                                 >
-                                    <span className="text-xs font-sans font-bold tracking-widest uppercase">{t.locateMe[lang]}</span>
+                                    {t.back[lang]}
                                 </button>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto px-8 py-4">
-                            <AnimatePresence mode="wait">
-                                {/* CONTINENT VIEW */}
-                                {view === "continent" && (
-                                    <motion.div
-                                        key="continents"
-                                        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="space-y-2"
+                            {/* Locate Me (only on continent view) */}
+                            {view === "continent" && (
+                                <div className="px-8 pt-4 pb-2 shrink-0">
+                                    <button
+                                        onClick={() => { onLocateMe(); handleClose(); }}
+                                        className={`w-full flex items-center justify-center gap-2 py-3 border transition-all duration-300 ${isDark
+                                            ? "border-[#FAF9F6]/20 hover:border-[#FAF9F6] hover:bg-[#FAF9F6] hover:text-[#121212]"
+                                            : "border-museum-text/20 hover:border-museum-text hover:bg-museum-text hover:text-white"
+                                            }`}
                                     >
-                                        {CONTINENTS.map((continent) => (
-                                            <button
-                                                key={continent.name}
-                                                onClick={() => handleContinentClick(continent)}
-                                                className="w-full text-left flex items-center justify-between py-4 px-4 rounded-lg hover:bg-museum-text/5 transition-colors group"
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-2xl">{continentEmoji[continent.name] || "🌐"}</span>
-                                                    <div>
-                                                        <span className="font-serif text-lg block">{lang === "zh" ? continent.nameCn : continent.name}</span>
-                                                        <span className="text-[10px] font-sans tracking-widest uppercase text-museum-text/40">
-                                                            {continent.countries.length} {lang === "zh" ? "國家" : "countries"}
-                                                        </span>
+                                        <span className="text-xs font-sans font-bold tracking-widest uppercase">{t.locateMe[lang]}</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto px-8 py-4">
+                                <AnimatePresence mode="wait">
+                                    {/* CONTINENT VIEW */}
+                                    {view === "continent" && (
+                                        <motion.div
+                                            key="continents"
+                                            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="space-y-2"
+                                        >
+                                            {CONTINENTS.map((continent) => (
+                                                <button
+                                                    key={continent.name}
+                                                    onClick={() => handleContinentClick(continent)}
+                                                    className={`w-full text-left flex items-center justify-between py-4 px-4 rounded-lg transition-colors group ${isDark ? "hover:bg-[#FAF9F6]/5" : "hover:bg-museum-text/5"}`}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="text-2xl">{continentEmoji[continent.name] || "🌐"}</span>
+                                                        <div>
+                                                            <span className="font-serif text-lg block">{lang === "zh" ? continent.nameCn : continent.name}</span>
+                                                            <span className={`text-[10px] font-sans tracking-widest uppercase ${isDark ? "text-[#FAF9F6]/40" : "text-museum-text/40"}`}>
+                                                                {continent.countries.length} {lang === "zh" ? "國家" : "countries"}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <span className="text-museum-text/30 group-hover:text-museum-text/60 transition-colors text-lg">→</span>
-                                            </button>
-                                        ))}
-                                    </motion.div>
-                                )}
+                                                    <span className={`text-lg transition-colors ${isDark ? "text-[#FAF9F6]/30 group-hover:text-[#FAF9F6]/60" : "text-museum-text/30 group-hover:text-museum-text/60"}`}>→</span>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
 
-                                {/* COUNTRY VIEW */}
-                                {view === "country" && activeContinent && (
-                                    <motion.div
-                                        key="countries"
-                                        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="space-y-1"
-                                    >
-                                        {activeContinent.countries.map((country) => (
-                                            <button
-                                                key={country.name}
-                                                onClick={() => handleCountryClick(country)}
-                                                className="w-full text-left flex items-center justify-between py-3 px-4 rounded-lg hover:bg-museum-text/5 transition-colors group"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-sans font-bold tracking-widest text-museum-text/40 w-6">{country.code}</span>
-                                                    <span className="font-serif text-base">{lang === "zh" ? country.nameCn : country.name}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-sans text-museum-text/30">
-                                                        {country.cities.length} {lang === "zh" ? "城市" : "cities"}
+                                    {/* COUNTRY VIEW */}
+                                    {view === "country" && activeContinent && (
+                                        <motion.div
+                                            key="countries"
+                                            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="space-y-1"
+                                        >
+                                            {activeContinent.countries.map((country) => (
+                                                <button
+                                                    key={country.name}
+                                                    onClick={() => handleCountryClick(country)}
+                                                    className={`w-full text-left flex items-center justify-between py-3 px-4 rounded-lg transition-colors group ${isDark ? "hover:bg-[#FAF9F6]/5" : "hover:bg-museum-text/5"}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`text-xs font-sans font-bold tracking-widest w-6 ${isDark ? "text-[#FAF9F6]/40" : "text-museum-text/40"}`}>{country.code}</span>
+                                                        <span className="font-serif text-base">{lang === "zh" ? country.nameCn : country.name}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-[10px] font-sans ${isDark ? "text-[#FAF9F6]/30" : "text-museum-text/30"}`}>
+                                                            {country.cities.length} {lang === "zh" ? "城市" : "cities"}
+                                                        </span>
+                                                        <span className={`transition-colors ${isDark ? "text-[#FAF9F6]/30 group-hover:text-[#FAF9F6]/60" : "text-museum-text/30 group-hover:text-museum-text/60"}`}>→</span>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+
+                                    {/* CITY VIEW */}
+                                    {view === "city" && activeCountry && (
+                                        <motion.div
+                                            key="cities"
+                                            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="space-y-1"
+                                        >
+                                            {activeCountry.cities.map((city) => (
+                                                <button
+                                                    key={city.name}
+                                                    onClick={() => handleCityClick(city.name)}
+                                                    className={clsx(
+                                                        "w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-200",
+                                                        selectedCity === city.name
+                                                            ? "bg-museum-accent/10 text-museum-accent"
+                                                            : isDark
+                                                                ? "hover:bg-[#FAF9F6]/5 text-[#FAF9F6]"
+                                                                : "hover:bg-museum-text/5 text-museum-text"
+                                                    )}
+                                                >
+                                                    {selectedCity === city.name && (
+                                                        <motion.span layoutId="cityDot" className="w-1.5 h-1.5 bg-museum-accent rounded-full shrink-0" />
+                                                    )}
+                                                    <span className={clsx("font-serif text-lg", selectedCity === city.name && "italic font-bold")}>
+                                                        {lang === "zh" ? city.nameCn : city.name}
                                                     </span>
-                                                    <span className="text-museum-text/30 group-hover:text-museum-text/60 transition-colors">→</span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </motion.div>
-                                )}
-
-                                {/* CITY VIEW */}
-                                {view === "city" && activeCountry && (
-                                    <motion.div
-                                        key="cities"
-                                        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="space-y-1"
-                                    >
-                                        {activeCountry.cities.map((city) => (
-                                            <button
-                                                key={city.name}
-                                                onClick={() => handleCityClick(city.name)}
-                                                className={clsx(
-                                                    "w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-200",
-                                                    selectedCity === city.name
-                                                        ? "bg-museum-accent/10 text-museum-accent"
-                                                        : "hover:bg-museum-text/5 text-museum-text"
-                                                )}
-                                            >
-                                                {selectedCity === city.name && (
-                                                    <motion.span layoutId="cityDot" className="w-1.5 h-1.5 bg-museum-accent rounded-full shrink-0" />
-                                                )}
-                                                <span className={clsx("font-serif text-lg", selectedCity === city.name && "italic font-bold")}>
-                                                    {lang === "zh" ? city.nameCn : city.name}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </motion.div>
+                    </>
+                )
+            }
+        </AnimatePresence >
     );
 }
